@@ -1,0 +1,11 @@
+"workshopitem"
+{
+	"appid"		"322330"
+	"publishedfileid"		"2431691504"
+	"contentfolder"		"/home/jwilm/code/geometric_drop/mod"
+	"previewfile"		"/home/jwilm/code/geometric_drop/modicon.png"
+	"visibility"		"0"
+	"title"		"Geometric Drop"
+	"description"		"Drop items aligned to configurable grid with visual placer"
+	"changenote"		"Initial Release"
+}

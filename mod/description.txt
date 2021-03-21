@@ -1,0 +1,9 @@
+[h1]Geometric Item Dropping[/h1]
+
+Drop items aligned to a configurable grid with a visual placer.
+
+[h1]Controls[/h1]
+
+[*] Change grid spacing (default: G)
+
+[*] Change grid offset (default: T)
