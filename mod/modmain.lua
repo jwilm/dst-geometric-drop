@@ -74,6 +74,7 @@ end
 
 local CYCLE_OFFSET_KEY = GetKeyConfig("CYCLE_OFFSET_KEY", "KEY_LEFTBRACKET")
 local CYCLE_RESOLUTION_KEY = GetKeyConfig("CYCLE_RESOLUTION_KEY", "KEY_RIGHTBRACKET")
+local RESTORE_DEFAULTS_KEY = GetKeyConfig("RESTORE_DEFAULTS_KEY", "KEY_EQUALS")
 
 local function round(num)
     return math.floor(num + 0.5)
@@ -153,6 +154,11 @@ end)
 
 TheInput:AddKeyUpHandler(CYCLE_RESOLUTION_KEY, function ()
     dropResolution = math.fmod(dropResolution + 1, DROP_RESOLUTION_LENGTH)
+end)
+
+TheInput:AddKeyUpHandler(RESTORE_DEFAULTS_KEY, function ()
+    dropResolution = DROP_RESOLUTION_QUARTER
+    dropOffset = DROP_OFFSET_DISABLED
 end)
 
 local function DropActiveItemOnGrid(pos, active_item)

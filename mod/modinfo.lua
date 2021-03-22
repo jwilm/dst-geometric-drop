@@ -1,8 +1,8 @@
 -- repository = https://github.com/jwilm/dst-geometric-drop
 name = "Geometric Drop"
-description = "Drop items aligned to the grid"
+description = "Drop items aligned to the grid with a visual placer"
 author = "Chaosmonkey"
-version = "0.1"
+version = "0.2"
 api_version_dst = 10
 
 icon_atlas = "modicon.xml"
@@ -36,4 +36,5 @@ end
 configuration_options = {
     AddConfig("Toggle alignment offset", "CYCLE_OFFSET_KEY", keylist, "KEY_T", "Toggle between aligning on (eg. tile) centers or corners"),
     AddConfig("Change resolution", "CYCLE_RESOLUTION_KEY", keylist, "KEY_G", "Cycle between 1/5, 1/4, 1/2, and full tile spacing"),
+    AddConfig("Reset defaults", "RESTORE_DEFAULTS_KEY", keylist, "KEY_EQUALS", "Disables the offset and restores spacing to 1/4 tile"),
 }
