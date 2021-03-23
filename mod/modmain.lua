@@ -216,7 +216,7 @@ AddComponentPostInit("playercontroller", function(self)
     self.GetLeftMouseAction = function(self)
         local act = PlayerControllerGetLeftMouseAction(self)
         if force_inspecting then return act end
-        if active_item and mouse_target then
+        if not act and active_item and mouse_target then
             act = drop_action
         end
         self.LMBaction = act
