@@ -2,7 +2,7 @@
 name = "Geometric Drop"
 description = "Drop items aligned to the grid with a visual placer"
 author = "Chaosmonkey"
-version = "0.4"
+version = "0.4.1"
 api_version_dst = 10
 
 icon_atlas = "modicon.xml"
@@ -30,6 +30,18 @@ local function AddConfig(label, name, options, default, hover)
 end
 
 local boolean = {{description = "Yes", data = true}, {description = "No", data = false}}
+local resolution_options = {
+    {description = "1/8 Tile", data = 0},
+    {description = "1/5 Tile", data = 1},
+    {description = "1/4 Tile", data = 2},
+    {description = "1/2 Tile", data = 3},
+    {description = "1 Tile",   data = 4},
+}
+
+local offset_options = {
+    {description = "Normal", data = 0},
+    {description = "Offset", data = 1},
+}
 
 -- Option 1. [unimplemented] Toggle visual drop indicator
 -- Option 2. Toggle grid spacing (1 tile (4 units), half tile, quarter tile)
@@ -40,5 +52,7 @@ configuration_options = {
     AddConfig("Change resolution", "CYCLE_RESOLUTION_KEY", keylist, "KEY_G", "Cycle between 1/5, 1/4, 1/2, and full tile spacing."),
     AddConfig("Reset defaults", "RESTORE_DEFAULTS_KEY", keylist, "KEY_EQUALS", "Disables the offset and restores spacing to 1/4 tile."),
     AddConfig("Toggle placer visibility", "TOGGLE_PLACERS_KEY", keylist, "KEY_MINUS", "Enables and disables placers being visible while holding an item"),
-    AddConfig("Placers visible by default", "PLACERS_START_VISIBLE", boolean, true, "Toggle whether placers show up by default while holding an item"),
+    AddConfig("Default visible placers", "PLACERS_START_VISIBLE", boolean, true, "Toggle whether placers show up by default while holding an item"),
+    AddConfig("Default grid spacing", "DEFAULT_DROP_RESOLUTION", resolution_options, 2, "Change which grid spacing is used upon entering game or using Reset Defaults keybind"),
+    AddConfig("Default offset grid", "DEFAULT_DROP_OFFSET", offset_options, 1, "Change which grid spacing is used upon entering game or using Reset Defaults keybind"),
 }

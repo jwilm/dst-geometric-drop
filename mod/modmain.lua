@@ -61,8 +61,10 @@ local TheWorld
 -- -----------------------
 local placersEnabled = GetModConfigData("PLACERS_START_VISIBLE")
 local placersVisible = false
-local dropResolution = DROP_RESOLUTION_QUARTER
-local dropOffset = DROP_OFFSET_ENABLED
+local defaultDropResolution = GetModConfigData("DEFAULT_DROP_RESOLUTION")
+local defaultDropOffset = GetModConfigData("DEFAULT_DROP_OFFSET")
+local dropResolution = defaultDropResolution
+local dropOffset = defaultDropOffset
 
 -- -----------------------
 -- Implementation
@@ -171,8 +173,8 @@ TheInput:AddKeyUpHandler(CYCLE_RESOLUTION_KEY, function ()
 end)
 
 TheInput:AddKeyUpHandler(RESTORE_DEFAULTS_KEY, function ()
-    dropResolution = DROP_RESOLUTION_QUARTER
-    dropOffset = DROP_OFFSET_ENABLED
+    dropResolution = defaultDropResolution
+    dropOffset = defaultDropOffset
 end)
 
 TheInput:AddKeyUpHandler(TOGGLE_PLACERS_KEY, function ()
