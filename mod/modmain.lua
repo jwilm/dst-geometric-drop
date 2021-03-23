@@ -58,6 +58,7 @@ local TheWorld
 -- -----------------------
 -- Variables
 -- -----------------------
+local placersEnabled = true
 local placersVisible = false
 local dropResolution = DROP_RESOLUTION_QUARTER
 local dropOffset = DROP_OFFSET_ENABLED
@@ -76,6 +77,7 @@ end
 local CYCLE_OFFSET_KEY = GetKeyConfig("CYCLE_OFFSET_KEY", "KEY_LEFTBRACKET")
 local CYCLE_RESOLUTION_KEY = GetKeyConfig("CYCLE_RESOLUTION_KEY", "KEY_RIGHTBRACKET")
 local RESTORE_DEFAULTS_KEY = GetKeyConfig("RESTORE_DEFAULTS_KEY", "KEY_EQUALS")
+local TOGGLE_PLACERS_KEY = GetKeyConfig("TOGGLE_PLACERS_KEY", "KEY_MINUS")
 
 local function round(num)
     return math.floor(num + 0.5)
@@ -92,11 +94,21 @@ end
 local CenterDropPlacer
 local AdjacentDropPlacer
 
-local function TogglePlacers(method)
-    CenterDropPlacer[method](CenterDropPlacer)
+local function ShowPlacers()
+    placersVisible = true
+    CenterDropPlacer:Show()
     for i=0,7 do
         local placer = AdjacentDropPlacer[i]
-        placer[method](placer)
+        placer:Show()
+    end
+end
+
+local function HidePlacers()
+    placersVisible = false
+    CenterDropPlacer:Hide()
+    for i=0,7 do
+        local placer = AdjacentDropPlacer[i]
+        placer:Hide()
     end
 end
 
@@ -162,6 +174,17 @@ TheInput:AddKeyUpHandler(RESTORE_DEFAULTS_KEY, function ()
     dropOffset = DROP_OFFSET_ENABLED
 end)
 
+TheInput:AddKeyUpHandler(TOGGLE_PLACERS_KEY, function ()
+    placersEnabled = not placersEnabled
+    local activeItem = ThePlayer.replica.inventory:GetActiveItem()
+    if activeItem and placersEnabled then
+        ShowPlacers()
+    elseif activeItem then
+        HidePlacers()
+    -- no else; placers will be shown next time there is an active item.
+    end
+end)
+
 local function DropActiveItemOnGrid(pos, active_item)
     local playercontroller = ThePlayer.components.playercontroller
 
@@ -212,12 +235,10 @@ AddComponentPostInit("playercontroller", function(self)
     end
     self.OnUpdate = function(self, dt)
         local next_active_item = ThePlayer.replica.inventory:GetActiveItem()
-        if not active_item and next_active_item then
-            placersVisible = true
-            TogglePlacers("Show")
-        elseif active_item and not next_active_item then
-            placersVisible = false
-            TogglePlacers("Hide")
+        if not active_item and next_active_item and placersEnabled then
+            ShowPlacers()
+        elseif active_item and not next_active_item and placersVisible then
+            HidePlacers()
         end
         active_item = next_active_item
 
