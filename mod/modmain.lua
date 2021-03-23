@@ -50,6 +50,7 @@ local SendRPCToServer = GLOBAL.SendRPCToServer
 local ACTIONS = GLOBAL.ACTIONS
 local CONTROL_FORCE_STACK = GLOBAL.CONTROL_FORCE_STACK
 local CONTROL_FORCE_TRADE = GLOBAL.CONTROL_FORCE_TRADE
+local CONTROL_FORCE_INSPECT = GLOBAL.CONTROL_FORCE_INSPECT
 local CONTROL_SECONDARY = GLOBAL.CONTROL_SECONDARY
 local RPC = GLOBAL.RPC
 local ThePlayer
@@ -207,7 +208,18 @@ AddComponentPostInit("playercontroller", function(self)
     TheWorld = GLOBAL.TheWorld
     InitializePlacers()
 
-    local active_item
+    local PlayerControllerGetLeftMouseAction = self.GetLeftMouseAction
+    local active_item, force_inspecting, mouse_target
+    local drop_action = BufferedAction(ThePlayer, nil, ACTIONS.DROP)
+    self.GetLeftMouseAction = function(self)
+        local act = PlayerControllerGetLeftMouseAction(self)
+        if force_inspecting then return act end
+        if active_item and mouse_target then
+            act = drop_action
+        end
+        self.LMBaction = act
+        return self.LMBaction
+    end
 
     local function DoModifiedLeftClickAction(act)
         if act.action == ACTIONS.DROP then
@@ -235,6 +247,8 @@ AddComponentPostInit("playercontroller", function(self)
     end
     self.OnUpdate = function(self, dt)
         local next_active_item = ThePlayer.replica.inventory:GetActiveItem()
+        force_inspecting = TheInput:IsControlPressed(CONTROL_FORCE_INSPECT)
+        mouse_target = TheInput:GetWorldEntityUnderMouse()
         if not active_item and next_active_item and placersEnabled then
             ShowPlacers()
         elseif active_item and not next_active_item and placersVisible then
