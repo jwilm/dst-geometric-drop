@@ -22,10 +22,11 @@ local DROP_RESOLUTION = {
 local DROP_RESOLUTION_LENGTH = 5
 
 -- Drop resolution selectors
-local DROP_RESOLUTION_FIFTH = 0
-local DROP_RESOLUTION_QUARTER = 1
-local DROP_RESOLUTION_HALF = 2
-local DROP_RESOLUTION_TILE = 3
+local DROP_RESOLUTION_EIGTH = 0
+local DROP_RESOLUTION_FIFTH = 1
+local DROP_RESOLUTION_QUARTER = 2
+local DROP_RESOLUTION_HALF = 3
+local DROP_RESOLUTION_TILE = 4
 
 -- The offsets are indexed by whether they are enabled. Offsets represent 1/2
 -- of the drop resolution for each step.
@@ -58,7 +59,7 @@ local TheWorld
 -- Variables
 -- -----------------------
 local placersVisible = false
-local dropResolution = DROP_RESOLUTION_HALF
+local dropResolution = DROP_RESOLUTION_QUARTER
 local dropOffset = DROP_OFFSET_ENABLED
 
 -- -----------------------
@@ -158,7 +159,7 @@ end)
 
 TheInput:AddKeyUpHandler(RESTORE_DEFAULTS_KEY, function ()
     dropResolution = DROP_RESOLUTION_QUARTER
-    dropOffset = DROP_OFFSET_DISABLED
+    dropOffset = DROP_OFFSET_ENABLED
 end)
 
 local function DropActiveItemOnGrid(pos, active_item)

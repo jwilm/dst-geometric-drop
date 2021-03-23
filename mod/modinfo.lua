@@ -34,7 +34,7 @@ end
 -- Option 3. [unimplemented] Default grid spacing and offset
 -- Option 4. Grid Spacing Offset (will optionally add 0.5 to the position)
 configuration_options = {
-    AddConfig("Toggle alignment offset", "CYCLE_OFFSET_KEY", keylist, "KEY_T", "Toggle between aligning on (eg. tile) centers or corners"),
-    AddConfig("Change resolution", "CYCLE_RESOLUTION_KEY", keylist, "KEY_G", "Cycle between 1/5, 1/4, 1/2, and full tile spacing"),
-    AddConfig("Reset defaults", "RESTORE_DEFAULTS_KEY", keylist, "KEY_EQUALS", "Disables the offset and restores spacing to 1/4 tile"),
+    AddConfig("Toggle alignment offset", "CYCLE_OFFSET_KEY", keylist, "KEY_T", "Toggle between aligning on (eg. tile) centers or corners."),
+    AddConfig("Change resolution", "CYCLE_RESOLUTION_KEY", keylist, "KEY_G", "Cycle between 1/5, 1/4, 1/2, and full tile spacing."),
+    AddConfig("Reset defaults", "RESTORE_DEFAULTS_KEY", keylist, "KEY_EQUALS", "Disables the offset and restores spacing to 1/4 tile."),
 }
