@@ -58,7 +58,7 @@ local TheWorld
 -- -----------------------
 -- Variables
 -- -----------------------
-local placersEnabled = true
+local placersEnabled = GetModConfigData("PLACERS_START_VISIBLE")
 local placersVisible = false
 local dropResolution = DROP_RESOLUTION_QUARTER
 local dropOffset = DROP_OFFSET_ENABLED
