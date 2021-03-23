@@ -2,7 +2,7 @@
 name = "Geometric Drop"
 description = "Drop items aligned to the grid with a visual placer"
 author = "Chaosmonkey"
-version = "0.2"
+version = "0.3"
 api_version_dst = 10
 
 icon_atlas = "modicon.xml"

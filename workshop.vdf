@@ -6,7 +6,18 @@
 	"previewfile"		"/home/jwilm/code/geometric_drop/modicon.png"
 	"visibility"		"0"
 	"title"		"Geometric Drop"
-	"changenote"		"Add control to reset spacing to default"
+	"changenote"		"Bug fixes
+[list]
+[*] Defaults now match Advanced Controls
+[*] Reset defaults key also matches Advanced Controls
+[/list]
+
+Added
+[list]
+[*] Key binding to toggle placer visibility
+[*] Default setting for placer visibility
+[/list]
+"
 	"description"		"
 [h1]Geometric Item Dropping[/h1]
 Drop items aligned to a configurable grid with a visual placer.
