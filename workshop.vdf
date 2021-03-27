@@ -6,7 +6,7 @@
 	"previewfile"		"/home/jwilm/code/geometric_drop/modicon.png"
 	"visibility"		"0"
 	"title"		"Geometric Drop"
-	"changenote"		"Fix issue with placing items in stash"
+	"changenote"		"Fix issue where controls would activate when typing in chat or consle"
 	"description"		"
 [h1]Geometric Item Dropping[/h1]
 Drop items aligned to a configurable grid with a visual placer.

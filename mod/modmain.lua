@@ -164,20 +164,32 @@ local function UpdatePlacers()
     CenterDropPlacer.Transform:SetPosition(x, -0.1, z)
 end
 
+function MightBeTyping()
+    if (TheFrontEnd:GetActiveScreen() and TheFrontEnd:GetActiveScreen().name or ""):find("HUD") ~= nil then
+        return false
+    end
+
+    return true
+end
+
 TheInput:AddKeyUpHandler(CYCLE_OFFSET_KEY, function ()
+    if MightBeTyping() then return end
     dropOffset = math.fmod(dropOffset + 1, DROP_OFFSETS_LENGTH)
 end)
 
 TheInput:AddKeyUpHandler(CYCLE_RESOLUTION_KEY, function ()
+    if MightBeTyping() then return end
     dropResolution = math.fmod(dropResolution + 1, DROP_RESOLUTION_LENGTH)
 end)
 
 TheInput:AddKeyUpHandler(RESTORE_DEFAULTS_KEY, function ()
+    if MightBeTyping() then return end
     dropResolution = defaultDropResolution
     dropOffset = defaultDropOffset
 end)
 
 TheInput:AddKeyUpHandler(TOGGLE_PLACERS_KEY, function ()
+    if MightBeTyping() then return end
     placersEnabled = not placersEnabled
     local activeItem = ThePlayer.replica.inventory:GetActiveItem()
     if activeItem and placersEnabled then
