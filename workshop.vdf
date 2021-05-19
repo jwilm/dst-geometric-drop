@@ -6,7 +6,7 @@
 	"previewfile"		"/home/jwilm/code/geometric_drop/modicon.png"
 	"visibility"		"0"
 	"title"		"Geometric Drop"
-	"changenote"		"Fix issue where controls would activate when typing in chat or consle"
+	"changenote"		"Add option to toggle geometric dropping in game"
 	"description"		"
 [h1]Geometric Item Dropping[/h1]
 Drop items aligned to a configurable grid with a visual placer.
@@ -17,6 +17,7 @@ Drop items aligned to a configurable grid with a visual placer.
 [*] Change grid offset (default: T)
 [*] Reset default spacing and offset (default: =)
 [*] Toggle placer visibility (default: -)
+[*] Toggle geometric dropping (default: H)
 [/list]
 
 [h1]Other Settings[/h1]

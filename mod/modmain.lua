@@ -1,3 +1,5 @@
+if GLOBAL.TheNet:IsDedicated() then return end
+
 PrefabFiles = {
     "CirclePlacer",
 }
@@ -60,6 +62,7 @@ local TheWorld
 -- Variables
 -- -----------------------
 local placersEnabled = GetModConfigData("PLACERS_START_VISIBLE")
+local geoDropEnabled = true
 local placersVisible = false
 local defaultDropResolution = GetModConfigData("DEFAULT_DROP_RESOLUTION")
 local defaultDropOffset = GetModConfigData("DEFAULT_DROP_OFFSET")
@@ -81,6 +84,7 @@ local CYCLE_OFFSET_KEY = GetKeyConfig("CYCLE_OFFSET_KEY", "KEY_LEFTBRACKET")
 local CYCLE_RESOLUTION_KEY = GetKeyConfig("CYCLE_RESOLUTION_KEY", "KEY_RIGHTBRACKET")
 local RESTORE_DEFAULTS_KEY = GetKeyConfig("RESTORE_DEFAULTS_KEY", "KEY_EQUALS")
 local TOGGLE_PLACERS_KEY = GetKeyConfig("TOGGLE_PLACERS_KEY", "KEY_MINUS")
+local TOGGLE_ENABLED_KEY = GetKeyConfig("TOGGLE_ENABLED_KEY", "KEY_H")
 
 local function round(num)
     return math.floor(num + 0.5)
@@ -130,6 +134,10 @@ local function InitializePlacers()
 end
 
 local function AlignToGrid(pos)
+    if not geoDropEnabled then
+        return pos
+    end
+
 	local x = pos.x
 	local z = pos.z
 	
@@ -186,6 +194,11 @@ TheInput:AddKeyUpHandler(RESTORE_DEFAULTS_KEY, function ()
     if MightBeTyping() then return end
     dropResolution = defaultDropResolution
     dropOffset = defaultDropOffset
+end)
+
+TheInput:AddKeyUpHandler(TOGGLE_ENABLED_KEY, function ()
+    if MightBeTyping() then return end
+    geoDropEnabled = not geoDropEnabled
 end)
 
 TheInput:AddKeyUpHandler(TOGGLE_PLACERS_KEY, function ()
