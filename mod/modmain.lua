@@ -138,9 +138,9 @@ local function AlignToGrid(pos)
         return pos
     end
 
-	local x = pos.x
-	local z = pos.z
-	
+    local x = pos.x
+    local z = pos.z
+
     -- Lookup correct resolution and offset
     local resolution = DROP_RESOLUTION[dropResolution]
     local offset  = DROP_OFFSETS[dropOffset][dropResolution]
@@ -158,7 +158,7 @@ local function UpdatePlacers()
 
     local x = center.x
     local z = center.z
-	
+
     local resolution = DROP_RESOLUTION[dropResolution]
 
     AdjacentDropPlacer[0].Transform:SetPosition(x - resolution, -0.1, z - resolution)
