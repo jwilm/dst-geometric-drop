@@ -211,6 +211,7 @@ end)
 TheInput:AddKeyUpHandler(RESTORE_DEFAULTS_KEY, function ()
     if MightBeTyping() then return end
     dropper:Reset()
+    geoDropEnabled = true
     dropResolution = defaultDropResolution
     dropOffset = defaultDropOffset
 end)
