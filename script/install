@@ -1,0 +1,4 @@
+#!/bin/bash
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
+DEST="/home/jwilm/.steam/debian-installation/steamapps/common/Don't Starve Together/mods/geometric_drop/"
+cp -r "${DIR}/../mod/"* "${DEST}"

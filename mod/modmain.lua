@@ -69,9 +69,17 @@ local defaultDropOffset = GetModConfigData("DEFAULT_DROP_OFFSET")
 local dropResolution = defaultDropResolution
 local dropOffset = defaultDropOffset
 
+local CenterDropPlacer
+local AdjacentDropPlacer
+
 -- -----------------------
--- Implementation
+-- Shared
 -- -----------------------
+
+local function round(num)
+    return math.floor(num + 0.5)
+end
+
 local function GetKeyConfig(config)
     local key = GetModConfigData(config, true)
     if type(key) == "string" and GLOBAL:rawget(key) then
@@ -86,37 +94,12 @@ local RESTORE_DEFAULTS_KEY = GetKeyConfig("RESTORE_DEFAULTS_KEY", "KEY_EQUALS")
 local TOGGLE_PLACERS_KEY = GetKeyConfig("TOGGLE_PLACERS_KEY", "KEY_MINUS")
 local TOGGLE_ENABLED_KEY = GetKeyConfig("TOGGLE_ENABLED_KEY", "KEY_H")
 
-local function round(num)
-    return math.floor(num + 0.5)
-end
-
 local function NewCirclePlacer(anim, scale)
     local placer = SpawnPrefab(CIRCLE_PLACER)
     placer.AnimState:PlayAnimation(anim, true)
     placer.Transform:SetScale(scale, scale, scale)
     placer:Hide()
     return placer
-end
-
-local CenterDropPlacer
-local AdjacentDropPlacer
-
-local function ShowPlacers()
-    placersVisible = true
-    CenterDropPlacer:Show()
-    for i=0,7 do
-        local placer = AdjacentDropPlacer[i]
-        placer:Show()
-    end
-end
-
-local function HidePlacers()
-    placersVisible = false
-    CenterDropPlacer:Hide()
-    for i=0,7 do
-        local placer = AdjacentDropPlacer[i]
-        placer:Hide()
-    end
 end
 
 local function InitializePlacers()
@@ -133,7 +116,20 @@ local function InitializePlacers()
     }
 end
 
-local function AlignToGrid(pos)
+function MightBeTyping()
+    if (TheFrontEnd:GetActiveScreen() and TheFrontEnd:GetActiveScreen().name or ""):find("HUD") ~= nil then
+        return false
+    end
+
+    return true
+end
+
+-- -----------------------
+-- Square Placement
+-- -----------------------
+
+local SquareDropper = {}
+function SquareDropper:AlignToGrid(pos)
     if not geoDropEnabled then
         return pos
     end
@@ -152,9 +148,9 @@ local function AlignToGrid(pos)
     return pos
 end
 
-local function UpdatePlacers()
+function SquareDropper:UpdatePlacers(pos)
     if not placersVisible then return end
-    local center = AlignToGrid(TheInput:GetWorldPosition())
+    local center = self:AlignToGrid(TheInput:GetWorldPosition())
 
     local x = center.x
     local z = center.z
@@ -172,13 +168,35 @@ local function UpdatePlacers()
     CenterDropPlacer.Transform:SetPosition(x, -0.1, z)
 end
 
-function MightBeTyping()
-    if (TheFrontEnd:GetActiveScreen() and TheFrontEnd:GetActiveScreen().name or ""):find("HUD") ~= nil then
-        return false
+function SquareDropper:ShowPlacers()
+    placersVisible = true
+    CenterDropPlacer:Show()
+    for i=0,7 do
+        local placer = AdjacentDropPlacer[i]
+        placer:Show()
     end
-
-    return true
 end
+
+function SquareDropper:HidePlacers()
+    placersVisible = false
+    CenterDropPlacer:Hide()
+    for i=0,7 do
+        local placer = AdjacentDropPlacer[i]
+        placer:Hide()
+    end
+end
+
+function SquareDropper:Reset()
+    -- noop
+end
+
+-- Use square dropper by default.
+local dropper = SquareDropper
+
+
+-- ---------------------------
+-- Key handling, common to all
+-- ---------------------------
 
 TheInput:AddKeyUpHandler(CYCLE_OFFSET_KEY, function ()
     if MightBeTyping() then return end
@@ -192,6 +210,7 @@ end)
 
 TheInput:AddKeyUpHandler(RESTORE_DEFAULTS_KEY, function ()
     if MightBeTyping() then return end
+    dropper:Reset()
     dropResolution = defaultDropResolution
     dropOffset = defaultDropOffset
 end)
@@ -206,9 +225,9 @@ TheInput:AddKeyUpHandler(TOGGLE_PLACERS_KEY, function ()
     placersEnabled = not placersEnabled
     local activeItem = ThePlayer.replica.inventory:GetActiveItem()
     if activeItem and placersEnabled then
-        ShowPlacers()
+        dropper:ShowPlacers()
     elseif activeItem then
-        HidePlacers()
+        dropper:HidePlacers()
     -- no else; placers will be shown next time there is an active item.
     end
 end)
@@ -216,7 +235,7 @@ end)
 local function DropActiveItemOnGrid(pos, active_item)
     local playercontroller = ThePlayer.components.playercontroller
 
-    pos = AlignToGrid(pos)
+    pos = dropper:AlignToGrid(pos)
 
     local act = BufferedAction(ThePlayer, nil, ACTIONS.DROP, active_item, pos)
     if playercontroller.locomotor then
@@ -277,13 +296,13 @@ AddComponentPostInit("playercontroller", function(self)
         force_inspecting = TheInput:IsControlPressed(CONTROL_FORCE_INSPECT)
         mouse_target = TheInput:GetWorldEntityUnderMouse()
         if not active_item and next_active_item and placersEnabled then
-            ShowPlacers()
+            dropper:ShowPlacers()
         elseif active_item and not next_active_item and placersVisible then
-            HidePlacers()
+            dropper:HidePlacers()
         end
         active_item = next_active_item
 
-        if InGame() then UpdatePlacers() end
+        if InGame() then dropper:UpdatePlacers() end
 
         return PlayerControllerOnUpdate(self, dt)
     end
