@@ -2,7 +2,7 @@
 name = "Geometric Drop"
 description = "Drop items aligned to the grid with a visual placer"
 author = "Chaosmonkey"
-version = "1.3"
+version = "1.3.1"
 api_version_dst = 10
 
 icon_atlas = "modicon.xml"
@@ -48,12 +48,15 @@ local offset_options = {
 -- Option 3. [unimplemented] Default grid spacing and offset
 -- Option 4. Grid Spacing Offset (will optionally add 0.5 to the position)
 configuration_options = {
-    AddConfig("Toggle alignment offset", "CYCLE_OFFSET_KEY", keylist, "KEY_T", "Toggle between aligning on (eg. tile) centers or corners."),
-    AddConfig("Change resolution", "CYCLE_RESOLUTION_KEY", keylist, "KEY_G", "Cycle between 1/5, 1/4, 1/2, and full tile spacing."),
-    AddConfig("Reset defaults", "RESTORE_DEFAULTS_KEY", keylist, "KEY_EQUALS", "Disables the offset and restores spacing to 1/4 tile."),
-    AddConfig("Toggle placer visibility", "TOGGLE_PLACERS_KEY", keylist, "KEY_MINUS", "Enables and disables placers being visible while holding an item"),
-    AddConfig("Toggle geo drop", "TOGGLE_ENABLED_KEY", keylist, "KEY_H", "Enables and disables geometric dropping"),
-    AddConfig("Default visible placers", "PLACERS_START_VISIBLE", boolean, true, "Toggle whether placers show up by default while holding an item"),
-    AddConfig("Default grid spacing", "DEFAULT_DROP_RESOLUTION", resolution_options, 2, "Change which grid spacing is used upon entering game or using Reset Defaults keybind"),
-    AddConfig("Default offset grid", "DEFAULT_DROP_OFFSET", offset_options, 1, "Change which grid spacing is used upon entering game or using Reset Defaults keybind"),
+    -- Keys
+    AddConfig("Toggle alignment offset",  "CYCLE_OFFSET_KEY",         keylist, "KEY_T",      "Toggle between aligning on (eg. tile) centers or corners."),
+    AddConfig("Change resolution",        "CYCLE_RESOLUTION_KEY",     keylist, "KEY_G",      "Cycle between 1/5, 1/4, 1/2, and full tile spacing."),
+    AddConfig("Reset defaults",           "RESTORE_DEFAULTS_KEY",     keylist, "KEY_EQUALS", "Disables the offset and restores spacing to 1/4 tile."),
+    AddConfig("Toggle placer visibility", "TOGGLE_PLACERS_KEY",       keylist, "KEY_MINUS",  "Enables and disables placers being visible while holding an item"),
+    AddConfig("Toggle geo drop",          "TOGGLE_ENABLED_KEY",       keylist, "KEY_H",      "Enables and disables geometric dropping"),
+
+    -- Options
+    AddConfig("Default visible placers", "PLACERS_START_VISIBLE",   boolean,            true, "Toggle whether placers show up by default while holding an item"),
+    AddConfig("Default grid spacing",    "DEFAULT_DROP_RESOLUTION", resolution_options, 2,    "Change which grid spacing is used upon entering game or using Reset Defaults keybind"),
+    AddConfig("Default offset grid",     "DEFAULT_DROP_OFFSET",     offset_options,     1,    "Change which grid spacing is used upon entering game or using Reset Defaults keybind"),
 }

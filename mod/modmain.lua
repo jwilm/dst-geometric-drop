@@ -93,6 +93,8 @@ local CYCLE_RESOLUTION_KEY = GetKeyConfig("CYCLE_RESOLUTION_KEY", "KEY_RIGHTBRAC
 local RESTORE_DEFAULTS_KEY = GetKeyConfig("RESTORE_DEFAULTS_KEY", "KEY_EQUALS")
 local TOGGLE_PLACERS_KEY = GetKeyConfig("TOGGLE_PLACERS_KEY", "KEY_MINUS")
 local TOGGLE_ENABLED_KEY = GetKeyConfig("TOGGLE_ENABLED_KEY", "KEY_H")
+local CYCLE_PLACEMENT_MODE_KEY = GetKeyConfig("CYCLE_PLACEMENT_MODE_KEY", "KEY_V")
+local PICK_POINT_KEY = GetKeyConfig("PICK_POINT_KEY", "KEY_C")
 
 local function NewCirclePlacer(anim, scale)
     local placer = SpawnPrefab(CIRCLE_PLACER)
@@ -124,11 +126,18 @@ function MightBeTyping()
     return true
 end
 
+LineDropper = {rotation = 0.2}
+SquareDropper = {}
+CircleDropper = {
+    origin = { x = 0, y = 0, z = 0},
+    last_input = { r = 0, theta = 0, d_theta = 0 }
+}
+dropper = SquareDropper
+
 -- -----------------------
 -- Square Placement
 -- -----------------------
 
-local SquareDropper = {}
 function SquareDropper:AlignToGrid(pos)
     if not geoDropEnabled then
         return pos
@@ -148,7 +157,7 @@ function SquareDropper:AlignToGrid(pos)
     return pos
 end
 
-function SquareDropper:UpdatePlacers(pos)
+function SquareDropper:UpdatePlacers()
     if not placersVisible then return end
     local center = self:AlignToGrid(TheInput:GetWorldPosition())
 
@@ -190,9 +199,225 @@ function SquareDropper:Reset()
     -- noop
 end
 
--- Use square dropper by default.
-local dropper = SquareDropper
+function SquareDropper:PickPoint()
+end
 
+function SquareDropper:NextDropper()
+    return CircleDropper
+end
+
+-- -----------------------
+-- Line Placement
+-- -----------------------
+
+-- Note that the line dropper is not currently accessible; its functionality
+-- will eventually be absorbed into the default dropper implementation.
+
+function Rotate(x, z, theta)
+    local cost = math.cos(theta)
+    local sint = math.sin(theta)
+
+    local xprime = x * cost - z * sint
+    local zprime = x * sint + z * cost
+
+    return xprime, zprime
+end
+
+function LineDropper:AlignToGrid(pos)
+    print("LineDropper:AlignToGrid x_init=" .. pos.x .. ", z_init=" .. pos.z)
+    if not geoDropEnabled then
+        return pos
+    end
+
+    local x
+    local z
+
+    x, z = Rotate(pos.x, pos.z, -self.rotation)
+
+    -- Lookup correct resolution and offset
+    local resolution = DROP_RESOLUTION[dropResolution]
+    local offset  = DROP_OFFSETS[dropOffset][dropResolution]
+
+    -- Adjust coordinates based on resolution and offset
+    x =  (resolution * round((x + offset) / resolution) - offset)
+    z =  (resolution * round((z + offset) / resolution) - offset)
+    x, z = Rotate(x, z, self.rotation)
+
+    pos.x = x
+    pos.z = z
+
+    print("LineDropper:AlignToGrid x_out=" .. pos.x .. ", z_out=" .. pos.z)
+    return pos
+end
+
+function LineDropper:UpdatePlacers()
+    if not placersVisible then return end
+    local center = self:AlignToGrid(TheInput:GetWorldPosition())
+
+    local x = center.x
+    local z = center.z
+
+    local resolution = DROP_RESOLUTION[dropResolution]
+    local x_offset, z_offset = resolution * math.cos(self.rotation), resolution * math.sin(self.rotation)
+
+    AdjacentDropPlacer[0].Transform:SetPosition(x - x_offset, -0.1, z - z_offset)
+    AdjacentDropPlacer[1].Transform:SetPosition(x + x_offset, -0.1, z + z_offset)
+    CenterDropPlacer.Transform:SetPosition(x, -0.1, z)
+end
+
+function LineDropper:ShowPlacers()
+    placersVisible = true
+    CenterDropPlacer:Show()
+    for i=0,1 do
+        local placer = AdjacentDropPlacer[i]
+        placer:Show()
+    end
+end
+
+function LineDropper:HidePlacers()
+    placersVisible = false
+    CenterDropPlacer:Hide()
+    for i=0,7 do
+        local placer = AdjacentDropPlacer[i]
+        placer:Hide()
+    end
+end
+
+function LineDropper:Reset()
+    self.rotation = 0.2
+    -- noop
+end
+
+function LineDropper:PickPoint()
+end
+
+function LineDropper:NextDropper()
+    return CircleDropper
+end
+
+------------------------------------------
+-- Circle Dropper
+------------------------------------------
+
+function CircleDropper:WorldToPolarAligned(pos)
+    local x = pos.x
+    local z = pos.z
+
+    -- print("CircleDropper:AlignToGrid x_init=" .. x .. ", z_init=" .. z)
+
+    -- Lookup correct resolution and offset
+    local resolution = DROP_RESOLUTION[dropResolution]
+    local offset  = DROP_OFFSETS[dropOffset][dropResolution]
+
+    -- Step 1. Translate to (0, 0)
+    x = x - self.origin.x
+    z = z - self.origin.z
+
+    -- Step 2. Compute specific Radius
+    local r = math.sqrt(x * x + z * z)
+
+    -- Step 3. Round Radius to nearest resolution
+    r = resolution * round((r + offset) / resolution) - offset
+
+    -- Step 4. Compute θ
+    -- Note: DST's Lua version doesn't have the newer atan so we use the
+    -- deprecated atan2.
+    local theta = math.atan2(z, x)
+
+    -- Step 5. Round to nearest angle step
+    local circumference = 2 * math.pi * r
+    local steps_at_r = round(circumference / resolution)
+    local theta_step = 2 * math.pi / steps_at_r
+    local theta_offset = (theta_step * dropOffset) / 2.0
+    theta = theta_step * round((theta + theta_offset) / theta_step) - theta_offset
+
+    return { r = r, theta = theta, d_theta = theta_step}
+end
+
+function CircleDropper:PolarToWorld(pol)
+    x = pol.r * math.cos(pol.theta)
+    z = pol.r * math.sin(pol.theta)
+
+    return {
+        x = x + self.origin.x,
+        z = z + self.origin.z,
+    }
+end
+
+function CircleDropper:InputWorldPositionPolar()
+    return self:WorldToPolarAligned(TheInput:GetWorldPosition())
+end
+
+function CircleDropper:AlignToGrid(pos)
+    if not geoDropEnabled then
+        return pos
+    end
+
+    local pol = self:WorldToPolarAligned(pos)
+    local new_pos = self:PolarToWorld(pol)
+    pos.x = new_pos.x
+    pos.z = new_pos.z
+
+    return pos
+end
+
+function CircleDropper:UpdatePlacers()
+    if not placersVisible then return end
+
+    local center = self:InputWorldPositionPolar()
+    -- early exit if location hasn't changed to avoid extra work
+    if center.r == self.last_input.r and center.theta == self.last_input.theta and center.d_theta == self.last_input.d_theta then
+        return
+    end
+
+    local d_theta = center.d_theta
+
+    for index, i in pairs({[0] = -2, [1] = -1, [2] = 1, [3] = 2}) do
+        local pol = {
+            r = center.r,
+            d_theta = d_theta,
+            theta = center.theta + i * d_theta,
+        }
+
+        local pos = self:PolarToWorld(pol)
+        AdjacentDropPlacer[index].Transform:SetPosition(pos.x, -0.1, pos.z)
+    end
+
+    center = self:PolarToWorld(center)
+    CenterDropPlacer.Transform:SetPosition(center.x, -0.1, center.z)
+end
+
+function CircleDropper:ShowPlacers()
+    placersVisible = true
+    CenterDropPlacer:Show()
+    for i=0,3 do
+        local placer = AdjacentDropPlacer[i]
+        placer:Show()
+    end
+end
+
+function CircleDropper:HidePlacers()
+    placersVisible = false
+    CenterDropPlacer:Hide()
+    for i=0,7 do
+        local placer = AdjacentDropPlacer[i]
+        placer:Hide()
+    end
+end
+
+function CircleDropper:Reset()
+    self.origin = {x = 0, y = 0, z = 0}
+end
+
+function CircleDropper:PickPoint()
+    -- To make it so the player can reliably pick the same origin multiple
+    -- times, use grid alignment to set the origin
+    self.origin = SquareDropper:AlignToGrid(TheInput:GetWorldPosition())
+end
+
+function CircleDropper:NextDropper()
+    return SquareDropper
+end
 
 -- ---------------------------
 -- Key handling, common to all
@@ -205,7 +430,15 @@ end)
 
 TheInput:AddKeyUpHandler(CYCLE_RESOLUTION_KEY, function ()
     if MightBeTyping() then return end
-    dropResolution = math.fmod(dropResolution + 1, DROP_RESOLUTION_LENGTH)
+
+    if TheInput:IsControlPressed(CONTROL_FORCE_STACK) then
+        dropper:HidePlacers()
+        dropper = dropper:NextDropper()
+        dropper:PickPoint()
+        dropper:ShowPlacers()
+    else
+        dropResolution = math.fmod(dropResolution + 1, DROP_RESOLUTION_LENGTH)
+    end
 end)
 
 TheInput:AddKeyUpHandler(RESTORE_DEFAULTS_KEY, function ()
