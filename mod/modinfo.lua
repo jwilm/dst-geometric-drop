@@ -43,10 +43,6 @@ local offset_options = {
     {description = "Offset", data = 1},
 }
 
--- Option 1. [unimplemented] Toggle visual drop indicator
--- Option 2. Toggle grid spacing (1 tile (4 units), half tile, quarter tile)
--- Option 3. [unimplemented] Default grid spacing and offset
--- Option 4. Grid Spacing Offset (will optionally add 0.5 to the position)
 configuration_options = {
     -- Keys
     AddConfig("Toggle alignment offset",  "CYCLE_OFFSET_KEY",         keylist, "KEY_T",      "Toggle between aligning on (eg. tile) centers or corners."),

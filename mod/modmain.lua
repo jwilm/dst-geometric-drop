@@ -406,7 +406,6 @@ function CircleDropper:HidePlacers()
 end
 
 function CircleDropper:Reset()
-    self.origin = {x = 0, y = 0, z = 0}
 end
 
 function CircleDropper:PickPoint()
@@ -444,6 +443,7 @@ end)
 TheInput:AddKeyUpHandler(RESTORE_DEFAULTS_KEY, function ()
     if MightBeTyping() then return end
     dropper:Reset()
+    dropper = SquareDropper
     geoDropEnabled = true
     dropResolution = defaultDropResolution
     dropOffset = defaultDropOffset
