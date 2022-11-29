@@ -127,18 +127,18 @@ function MightBeTyping()
 end
 
 LineDropper = {rotation = 0.2}
-SquareDropper = {}
-CircleDropper = {
+GridDropper = {}
+PolarDropper = {
     origin = { x = 0, y = 0, z = 0},
     last_input = { r = 0, theta = 0, d_theta = 0 }
 }
-dropper = SquareDropper
+dropper = GridDropper
 
 -- -----------------------
 -- Square Placement
 -- -----------------------
 
-function SquareDropper:AlignToGrid(pos)
+function GridDropper:AlignToGrid(pos)
     if not geoDropEnabled then
         return pos
     end
@@ -157,7 +157,7 @@ function SquareDropper:AlignToGrid(pos)
     return pos
 end
 
-function SquareDropper:UpdatePlacers()
+function GridDropper:UpdatePlacers()
     if not placersVisible then return end
     local center = self:AlignToGrid(TheInput:GetWorldPosition())
 
@@ -177,7 +177,7 @@ function SquareDropper:UpdatePlacers()
     CenterDropPlacer.Transform:SetPosition(x, -0.1, z)
 end
 
-function SquareDropper:ShowPlacers()
+function GridDropper:ShowPlacers()
     placersVisible = true
     CenterDropPlacer:Show()
     for i=0,7 do
@@ -186,7 +186,7 @@ function SquareDropper:ShowPlacers()
     end
 end
 
-function SquareDropper:HidePlacers()
+function GridDropper:HidePlacers()
     placersVisible = false
     CenterDropPlacer:Hide()
     for i=0,7 do
@@ -195,15 +195,15 @@ function SquareDropper:HidePlacers()
     end
 end
 
-function SquareDropper:Reset()
+function GridDropper:Reset()
     -- noop
 end
 
-function SquareDropper:PickPoint()
+function GridDropper:PickPoint()
 end
 
-function SquareDropper:NextDropper()
-    return CircleDropper
+function GridDropper:NextDropper()
+    return PolarDropper
 end
 
 -- -----------------------
@@ -292,18 +292,18 @@ function LineDropper:PickPoint()
 end
 
 function LineDropper:NextDropper()
-    return CircleDropper
+    return PolarDropper
 end
 
 ------------------------------------------
 -- Circle Dropper
 ------------------------------------------
 
-function CircleDropper:WorldToPolarAligned(pos)
+function PolarDropper:WorldToPolarAligned(pos)
     local x = pos.x
     local z = pos.z
 
-    -- print("CircleDropper:AlignToGrid x_init=" .. x .. ", z_init=" .. z)
+    -- print("PolarDropper:AlignToGrid x_init=" .. x .. ", z_init=" .. z)
 
     -- Lookup correct resolution and offset
     local resolution = DROP_RESOLUTION[dropResolution]
@@ -334,7 +334,7 @@ function CircleDropper:WorldToPolarAligned(pos)
     return { r = r, theta = theta, d_theta = theta_step}
 end
 
-function CircleDropper:PolarToWorld(pol)
+function PolarDropper:PolarToWorld(pol)
     x = pol.r * math.cos(pol.theta)
     z = pol.r * math.sin(pol.theta)
 
@@ -344,11 +344,11 @@ function CircleDropper:PolarToWorld(pol)
     }
 end
 
-function CircleDropper:InputWorldPositionPolar()
+function PolarDropper:InputWorldPositionPolar()
     return self:WorldToPolarAligned(TheInput:GetWorldPosition())
 end
 
-function CircleDropper:AlignToGrid(pos)
+function PolarDropper:AlignToGrid(pos)
     if not geoDropEnabled then
         return pos
     end
@@ -361,7 +361,7 @@ function CircleDropper:AlignToGrid(pos)
     return pos
 end
 
-function CircleDropper:UpdatePlacers()
+function PolarDropper:UpdatePlacers()
     if not placersVisible then return end
 
     local center = self:InputWorldPositionPolar()
@@ -387,7 +387,7 @@ function CircleDropper:UpdatePlacers()
     CenterDropPlacer.Transform:SetPosition(center.x, -0.1, center.z)
 end
 
-function CircleDropper:ShowPlacers()
+function PolarDropper:ShowPlacers()
     placersVisible = true
     CenterDropPlacer:Show()
     for i=0,3 do
@@ -396,7 +396,7 @@ function CircleDropper:ShowPlacers()
     end
 end
 
-function CircleDropper:HidePlacers()
+function PolarDropper:HidePlacers()
     placersVisible = false
     CenterDropPlacer:Hide()
     for i=0,7 do
@@ -405,17 +405,17 @@ function CircleDropper:HidePlacers()
     end
 end
 
-function CircleDropper:Reset()
+function PolarDropper:Reset()
 end
 
-function CircleDropper:PickPoint()
+function PolarDropper:PickPoint()
     -- To make it so the player can reliably pick the same origin multiple
     -- times, use grid alignment to set the origin
-    self.origin = SquareDropper:AlignToGrid(TheInput:GetWorldPosition())
+    self.origin = GridDropper:AlignToGrid(TheInput:GetWorldPosition())
 end
 
-function CircleDropper:NextDropper()
-    return SquareDropper
+function PolarDropper:NextDropper()
+    return GridDropper
 end
 
 -- ---------------------------
@@ -443,7 +443,7 @@ end)
 TheInput:AddKeyUpHandler(RESTORE_DEFAULTS_KEY, function ()
     if MightBeTyping() then return end
     dropper:Reset()
-    dropper = SquareDropper
+    dropper = GridDropper
     geoDropEnabled = true
     dropResolution = defaultDropResolution
     dropOffset = defaultDropOffset
