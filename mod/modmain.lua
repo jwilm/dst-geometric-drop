@@ -62,7 +62,6 @@ local TheWorld
 -- Variables
 -- -----------------------
 local placersEnabled = GetModConfigData("PLACERS_START_VISIBLE")
-local geoDropEnabled = true
 local placersVisible = false
 local defaultDropResolution = GetModConfigData("DEFAULT_DROP_RESOLUTION")
 local defaultDropOffset = GetModConfigData("DEFAULT_DROP_OFFSET")
@@ -126,67 +125,33 @@ function MightBeTyping()
     return true
 end
 
-LineDropper = {rotation = 0.2}
-GridDropper = {}
+GridDropper = {rotation = 0.0}
+DefaultDropper = {}
 PolarDropper = {
     origin = { x = 0, y = 0, z = 0},
     last_input = { r = 0, theta = 0, d_theta = 0 }
 }
 dropper = GridDropper
 
--- -----------------------
--- Square Placement
--- -----------------------
+-- ----------------------------------------------------------------------------
+-- Disabled Dropper
+--
+-- This is the "no alignment" dropper which is effectively the default Don't
+-- Starve dropping experience. Ergo, it's called the DefaultDropper.
+-- ----------------------------------------------------------------------------
 
-function GridDropper:AlignToGrid(pos)
-    if not geoDropEnabled then
-        return pos
-    end
-
-    local x = pos.x
-    local z = pos.z
-
-    -- Lookup correct resolution and offset
-    local resolution = DROP_RESOLUTION[dropResolution]
-    local offset  = DROP_OFFSETS[dropOffset][dropResolution]
-
-    -- Adjust coordinates based on resolution and offset
-    pos.x = resolution * round((x + offset) / resolution) - offset
-    pos.z = resolution * round((z + offset) / resolution) - offset
-
+function DefaultDropper:AlignToGrid(pos)
     return pos
 end
 
-function GridDropper:UpdatePlacers()
-    if not placersVisible then return end
-    local center = self:AlignToGrid(TheInput:GetWorldPosition())
-
-    local x = center.x
-    local z = center.z
-
-    local resolution = DROP_RESOLUTION[dropResolution]
-
-    AdjacentDropPlacer[0].Transform:SetPosition(x - resolution, -0.1, z - resolution)
-    AdjacentDropPlacer[1].Transform:SetPosition(x - resolution, -0.1, z             )
-    AdjacentDropPlacer[2].Transform:SetPosition(x - resolution, -0.1, z + resolution)
-    AdjacentDropPlacer[3].Transform:SetPosition(x             , -0.1, z - resolution)
-    AdjacentDropPlacer[4].Transform:SetPosition(x             , -0.1, z + resolution)
-    AdjacentDropPlacer[5].Transform:SetPosition(x + resolution, -0.1, z - resolution)
-    AdjacentDropPlacer[6].Transform:SetPosition(x + resolution, -0.1, z             )
-    AdjacentDropPlacer[7].Transform:SetPosition(x + resolution, -0.1, z + resolution)
-    CenterDropPlacer.Transform:SetPosition(x, -0.1, z)
+function DefaultDropper:UpdatePlacers()
 end
 
-function GridDropper:ShowPlacers()
+function DefaultDropper:ShowPlacers()
     placersVisible = true
-    CenterDropPlacer:Show()
-    for i=0,7 do
-        local placer = AdjacentDropPlacer[i]
-        placer:Show()
-    end
 end
 
-function GridDropper:HidePlacers()
+function DefaultDropper:HidePlacers()
     placersVisible = false
     CenterDropPlacer:Hide()
     for i=0,7 do
@@ -195,23 +160,19 @@ function GridDropper:HidePlacers()
     end
 end
 
-function GridDropper:Reset()
-    -- noop
+function DefaultDropper:Reset()
 end
 
-function GridDropper:PickPoint()
+function DefaultDropper:PickPoint()
 end
 
-function GridDropper:NextDropper()
-    return PolarDropper
+function DefaultDropper:NextDropper()
+    return GridDropper
 end
 
--- -----------------------
--- Line Placement
--- -----------------------
-
--- Note that the line dropper is not currently accessible; its functionality
--- will eventually be absorbed into the default dropper implementation.
+-- ----------------------------------------------------------------------------
+-- Grid Placement
+-- ----------------------------------------------------------------------------
 
 function Rotate(x, z, theta)
     local cost = math.cos(theta)
@@ -223,12 +184,7 @@ function Rotate(x, z, theta)
     return xprime, zprime
 end
 
-function LineDropper:AlignToGrid(pos)
-    print("LineDropper:AlignToGrid x_init=" .. pos.x .. ", z_init=" .. pos.z)
-    if not geoDropEnabled then
-        return pos
-    end
-
+function GridDropper:AlignToGrid(pos)
     local x
     local z
 
@@ -246,11 +202,10 @@ function LineDropper:AlignToGrid(pos)
     pos.x = x
     pos.z = z
 
-    print("LineDropper:AlignToGrid x_out=" .. pos.x .. ", z_out=" .. pos.z)
     return pos
 end
 
-function LineDropper:UpdatePlacers()
+function GridDropper:UpdatePlacers()
     if not placersVisible then return end
     local center = self:AlignToGrid(TheInput:GetWorldPosition())
 
@@ -260,50 +215,61 @@ function LineDropper:UpdatePlacers()
     local resolution = DROP_RESOLUTION[dropResolution]
     local x_offset, z_offset = resolution * math.cos(self.rotation), resolution * math.sin(self.rotation)
 
-    AdjacentDropPlacer[0].Transform:SetPosition(x - x_offset, -0.1, z - z_offset)
-    AdjacentDropPlacer[1].Transform:SetPosition(x + x_offset, -0.1, z + z_offset)
-    CenterDropPlacer.Transform:SetPosition(x, -0.1, z)
+    AdjacentDropPlacer[0].Transform:SetPosition(x - x_offset - z_offset, -0.1, z - z_offset + x_offset)
+    AdjacentDropPlacer[1].Transform:SetPosition(x - x_offset           , -0.1, z - z_offset           )
+    AdjacentDropPlacer[2].Transform:SetPosition(x - x_offset + z_offset, -0.1, z - z_offset - x_offset)
+    AdjacentDropPlacer[3].Transform:SetPosition(x + z_offset           , -0.1, z - x_offset)
+    AdjacentDropPlacer[4].Transform:SetPosition(x - z_offset           , -0.1, z + x_offset)
+    AdjacentDropPlacer[5].Transform:SetPosition(x + x_offset - z_offset, -0.1, z + z_offset + x_offset)
+    AdjacentDropPlacer[6].Transform:SetPosition(x + x_offset           , -0.1, z + z_offset  )
+    AdjacentDropPlacer[7].Transform:SetPosition(x + x_offset + z_offset, -0.1, z + z_offset - x_offset)
+
+    CenterDropPlacer.Transform:SetPosition(     x           , -0.1, z           )
 end
 
-function LineDropper:ShowPlacers()
+function GridDropper:ShowPlacers()
     placersVisible = true
     CenterDropPlacer:Show()
-    for i=0,1 do
+    for i=0,7 do
         local placer = AdjacentDropPlacer[i]
         placer:Show()
     end
 end
 
-function LineDropper:HidePlacers()
-    placersVisible = false
-    CenterDropPlacer:Hide()
-    for i=0,7 do
-        local placer = AdjacentDropPlacer[i]
-        placer:Hide()
-    end
+function GridDropper:HidePlacers()
+    DefaultDropper:HidePlacers()
 end
 
-function LineDropper:Reset()
-    self.rotation = 0.2
-    -- noop
+function GridDropper:Reset()
+    self.rotation = 0.0
 end
 
-function LineDropper:PickPoint()
+function GridDropper:PickPoint()
+    local input = TheInput:GetWorldPosition()
+    local player = ThePlayer:GetPosition()
+    local x = player.x - input.x
+    local z = player.z - input.z
+    self.rotation = math.atan2(z, x)
+    -- round rotation to nearest 1 degree increment.
+    -- This rounding avoids the problem of "infinite" grids whereby every slight
+    -- rotation results in dramatically different results from AlignToGrid.
+    local res = 1 * math.pi / 180.0
+    self.rotation = round(self.rotation / res) * res
+
+    ThePlayer.components.talker:Say("Rotation: " .. round(self.rotation * 180.0 / math.pi))
 end
 
-function LineDropper:NextDropper()
+function GridDropper:NextDropper()
     return PolarDropper
 end
 
-------------------------------------------
--- Circle Dropper
-------------------------------------------
+-- ----------------------------------------------------------------------------
+-- Polar Placement
+-- ----------------------------------------------------------------------------
 
 function PolarDropper:WorldToPolarAligned(pos)
     local x = pos.x
     local z = pos.z
-
-    -- print("PolarDropper:AlignToGrid x_init=" .. x .. ", z_init=" .. z)
 
     -- Lookup correct resolution and offset
     local resolution = DROP_RESOLUTION[dropResolution]
@@ -349,10 +315,6 @@ function PolarDropper:InputWorldPositionPolar()
 end
 
 function PolarDropper:AlignToGrid(pos)
-    if not geoDropEnabled then
-        return pos
-    end
-
     local pol = self:WorldToPolarAligned(pos)
     local new_pos = self:PolarToWorld(pol)
     pos.x = new_pos.x
@@ -397,12 +359,7 @@ function PolarDropper:ShowPlacers()
 end
 
 function PolarDropper:HidePlacers()
-    placersVisible = false
-    CenterDropPlacer:Hide()
-    for i=0,7 do
-        local placer = AdjacentDropPlacer[i]
-        placer:Hide()
-    end
+    DefaultDropper:HidePlacers()
 end
 
 function PolarDropper:Reset()
@@ -415,12 +372,12 @@ function PolarDropper:PickPoint()
 end
 
 function PolarDropper:NextDropper()
-    return GridDropper
+    return DefaultDropper
 end
 
--- ---------------------------
+-- ----------------------------------------------------------------------------
 -- Key handling, common to all
--- ---------------------------
+-- ----------------------------------------------------------------------------
 
 TheInput:AddKeyUpHandler(CYCLE_OFFSET_KEY, function ()
     if MightBeTyping() then return end
@@ -430,28 +387,27 @@ end)
 TheInput:AddKeyUpHandler(CYCLE_RESOLUTION_KEY, function ()
     if MightBeTyping() then return end
 
-    if TheInput:IsControlPressed(CONTROL_FORCE_STACK) then
-        dropper:HidePlacers()
-        dropper = dropper:NextDropper()
-        dropper:PickPoint()
-        dropper:ShowPlacers()
-    else
-        dropResolution = math.fmod(dropResolution + 1, DROP_RESOLUTION_LENGTH)
-    end
+    dropResolution = math.fmod(dropResolution + 1, DROP_RESOLUTION_LENGTH)
 end)
 
 TheInput:AddKeyUpHandler(RESTORE_DEFAULTS_KEY, function ()
     if MightBeTyping() then return end
     dropper:Reset()
     dropper = GridDropper
-    geoDropEnabled = true
     dropResolution = defaultDropResolution
     dropOffset = defaultDropOffset
 end)
 
 TheInput:AddKeyUpHandler(TOGGLE_ENABLED_KEY, function ()
     if MightBeTyping() then return end
-    geoDropEnabled = not geoDropEnabled
+
+    if TheInput:IsControlPressed(CONTROL_FORCE_STACK) then
+        dropper:PickPoint()
+    else
+        dropper:HidePlacers()
+        dropper = dropper:NextDropper()
+        dropper:ShowPlacers()
+    end
 end)
 
 TheInput:AddKeyUpHandler(TOGGLE_PLACERS_KEY, function ()
