@@ -6,7 +6,7 @@
 	"previewfile"		"/home/jwilm/code/geometric_drop/modicon.png"
 	"visibility"		"0"
 	"title"		"Geometric Drop"
-	"changenote"		"Add option to toggle geometric dropping in game"
+	"changenote"		"Version 1.4. Adds grid rotation and circle dropping."
 	"description"		"
 [h1]Geometric Item Dropping[/h1]
 Drop items aligned to a configurable grid with a visual placer.
@@ -17,8 +17,14 @@ Drop items aligned to a configurable grid with a visual placer.
 [*] Change grid offset (default: T)
 [*] Reset default spacing and offset (default: =)
 [*] Toggle placer visibility (default: -)
-[*] Toggle geometric dropping (default: H)
+[*] MODE toggle (default: H) [control modifier sets origin, shift modifier rotates grid]
 [/list]
+
+[h1]Grid Dropper[/h1]
+Now supports picking a rotation point. Control + MODE sets the point. Shift + MODE rotates grid (move mouse).
+
+[h1]Circle Dropper[/h1]
+Drop items in a circle! 100% less square. Activate circle dropper with the MODE key. Select the center of the circle with Control+MODE.
 
 [h1]Other Settings[/h1]
 [list]

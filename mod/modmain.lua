@@ -70,6 +70,7 @@ local dropOffset = defaultDropOffset
 
 local CenterDropPlacer
 local AdjacentDropPlacer
+local OriginPlacer
 
 -- -----------------------
 -- Shared
@@ -115,6 +116,7 @@ local function InitializePlacers()
         [6] = NewCirclePlacer("off", 0.6),
         [7] = NewCirclePlacer("off", 0.6),
     }
+    OriginPlacer = NewCirclePlacer("on", 1.0)
 end
 
 function MightBeTyping()
@@ -125,13 +127,34 @@ function MightBeTyping()
     return true
 end
 
-GridDropper = {rotation = 0.0}
 DefaultDropper = {}
+GridDropper = {
+    rotation = 0.0,
+}
 PolarDropper = {
-    origin = { x = 0, y = 0, z = 0},
     last_input = { r = 0, theta = 0, d_theta = 0 }
 }
 dropper = GridDropper
+
+-- OriginManager provides a shared origin
+local OriginManager = { origin = { x = 0, y = 0, z = 0 }}
+function OriginManager:Reset()
+    self.origin = { x = 0, y = 0, z = 0 }
+    self:Update()
+end
+
+function OriginManager:Get()
+    return self.origin
+end
+
+function OriginManager:Update()
+    OriginPlacer.Transform:SetPosition(self.origin.x, -0.1, self.origin.z)
+end
+
+function OriginManager:Pick()
+    self.origin = dropper:AlignToGrid(TheInput:GetWorldPosition())
+    self:Update()
+end
 
 -- ----------------------------------------------------------------------------
 -- Disabled Dropper
@@ -154,6 +177,7 @@ end
 function DefaultDropper:HidePlacers()
     placersVisible = false
     CenterDropPlacer:Hide()
+    OriginPlacer:Hide()
     for i=0,7 do
         local placer = AdjacentDropPlacer[i]
         placer:Hide()
@@ -163,7 +187,7 @@ end
 function DefaultDropper:Reset()
 end
 
-function DefaultDropper:PickPoint()
+function DefaultDropper:PickRotation()
 end
 
 function DefaultDropper:NextDropper()
@@ -185,10 +209,15 @@ function Rotate(x, z, theta)
 end
 
 function GridDropper:AlignToGrid(pos)
-    local x
-    local z
+    local x = pos.x
+    local z = pos.z
 
-    x, z = Rotate(pos.x, pos.z, -self.rotation)
+    local origin = OriginManager:Get()
+
+    x = x - origin.x
+    z = z - origin.z
+
+    x, z = Rotate(x, z, -self.rotation)
 
     -- Lookup correct resolution and offset
     local resolution = DROP_RESOLUTION[dropResolution]
@@ -199,8 +228,8 @@ function GridDropper:AlignToGrid(pos)
     z =  (resolution * round((z + offset) / resolution) - offset)
     x, z = Rotate(x, z, self.rotation)
 
-    pos.x = x
-    pos.z = z
+    pos.x = origin.x + x
+    pos.z = origin.z + z
 
     return pos
 end
@@ -208,6 +237,8 @@ end
 function GridDropper:UpdatePlacers()
     if not placersVisible then return end
     local center = self:AlignToGrid(TheInput:GetWorldPosition())
+
+    -- TODO: skip update when center and rotation haven't changed.
 
     local x = center.x
     local z = center.z
@@ -230,6 +261,7 @@ end
 function GridDropper:ShowPlacers()
     placersVisible = true
     CenterDropPlacer:Show()
+    OriginPlacer:Show()
     for i=0,7 do
         local placer = AdjacentDropPlacer[i]
         placer:Show()
@@ -244,19 +276,20 @@ function GridDropper:Reset()
     self.rotation = 0.0
 end
 
-function GridDropper:PickPoint()
+function GridDropper:PickRotation()
     local input = TheInput:GetWorldPosition()
-    local player = ThePlayer:GetPosition()
-    local x = player.x - input.x
-    local z = player.z - input.z
-    self.rotation = math.atan2(z, x)
+    local origin = OriginManager:Get()
+    local x = origin.x - input.x
+    local z = origin.z - input.z
+    self.rotation = math.atan2(-x, z)
     -- round rotation to nearest 1 degree increment.
     -- This rounding avoids the problem of "infinite" grids whereby every slight
-    -- rotation results in dramatically different results from AlignToGrid.
+    -- rotation results in dramatically different results from AlignToGrid since
+    -- the rotations are relative to the world origin.
     local res = 1 * math.pi / 180.0
     self.rotation = round(self.rotation / res) * res
 
-    ThePlayer.components.talker:Say("Rotation: " .. round(self.rotation * 180.0 / math.pi))
+    ThePlayer.components.talker:Say("Geo Drop: Grid Angle is " .. round(self.rotation * 180.0 / math.pi) .. "°")
 end
 
 function GridDropper:NextDropper()
@@ -270,14 +303,15 @@ end
 function PolarDropper:WorldToPolarAligned(pos)
     local x = pos.x
     local z = pos.z
+    local origin = OriginManager:Get()
 
     -- Lookup correct resolution and offset
     local resolution = DROP_RESOLUTION[dropResolution]
     local offset  = DROP_OFFSETS[dropOffset][dropResolution]
 
     -- Step 1. Translate to (0, 0)
-    x = x - self.origin.x
-    z = z - self.origin.z
+    x = x - origin.x
+    z = z - origin.z
 
     -- Step 2. Compute specific Radius
     local r = math.sqrt(x * x + z * z)
@@ -304,9 +338,11 @@ function PolarDropper:PolarToWorld(pol)
     x = pol.r * math.cos(pol.theta)
     z = pol.r * math.sin(pol.theta)
 
+    local origin = OriginManager:Get()
+
     return {
-        x = x + self.origin.x,
-        z = z + self.origin.z,
+        x = x + origin.x,
+        z = z + origin.z,
     }
 end
 
@@ -352,6 +388,7 @@ end
 function PolarDropper:ShowPlacers()
     placersVisible = true
     CenterDropPlacer:Show()
+    OriginPlacer:Show()
     for i=0,3 do
         local placer = AdjacentDropPlacer[i]
         placer:Show()
@@ -363,12 +400,10 @@ function PolarDropper:HidePlacers()
 end
 
 function PolarDropper:Reset()
+    -- Could reset to world origin but that's not useful.
 end
 
-function PolarDropper:PickPoint()
-    -- To make it so the player can reliably pick the same origin multiple
-    -- times, use grid alignment to set the origin
-    self.origin = GridDropper:AlignToGrid(TheInput:GetWorldPosition())
+function PolarDropper:PickRotation()
 end
 
 function PolarDropper:NextDropper()
@@ -392,8 +427,16 @@ end)
 
 TheInput:AddKeyUpHandler(RESTORE_DEFAULTS_KEY, function ()
     if MightBeTyping() then return end
+
+    OriginManager:Reset()
     dropper:Reset()
+    dropper:HidePlacers()
     dropper = GridDropper
+
+    if placersEnabled then
+        dropper:ShowPlacers()
+    end
+
     dropResolution = defaultDropResolution
     dropOffset = defaultDropOffset
 end)
@@ -402,11 +445,21 @@ TheInput:AddKeyUpHandler(TOGGLE_ENABLED_KEY, function ()
     if MightBeTyping() then return end
 
     if TheInput:IsControlPressed(CONTROL_FORCE_STACK) then
-        dropper:PickPoint()
+        OriginManager:Pick()
+    elseif TheInput:IsControlPressed(CONTROL_FORCE_TRADE) then
+        -- noop, this is handled by KeyDown to do faster roations
     else
         dropper:HidePlacers()
         dropper = dropper:NextDropper()
         dropper:ShowPlacers()
+    end
+end)
+
+TheInput:AddKeyDownHandler(TOGGLE_ENABLED_KEY, function ()
+    if MightBeTyping() then return end
+
+    if TheInput:IsControlPressed(CONTROL_FORCE_TRADE) then
+        dropper:PickRotation()
     end
 end)
 
@@ -492,7 +545,9 @@ AddComponentPostInit("playercontroller", function(self)
         end
         active_item = next_active_item
 
-        if InGame() then dropper:UpdatePlacers() end
+        if InGame() then
+            dropper:UpdatePlacers()
+        end
 
         return PlayerControllerOnUpdate(self, dt)
     end
