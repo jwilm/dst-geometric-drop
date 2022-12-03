@@ -3,6 +3,10 @@ name = "Geometric Drop"
 description = [[
 Drop items aligned to the grid with a visual placer
 
+Version 1.4.1
+
+Added "Default mode" configuration option
+
 Version 1.4
 
 Grid Dropper: Pick a rotation point with Control + MODE. Rotate by holding Shift + MODE and moving the mouse.
@@ -12,7 +16,7 @@ MODE key: Geo Drop `Mode` keybinding. Default: H
 ]]
 
 author = "Chaosmonkey"
-version = "1.4"
+version = "1.4.1"
 api_version_dst = 10
 
 icon_atlas = "modicon.xml"
@@ -53,6 +57,12 @@ local offset_options = {
     {description = "Offset", data = 1},
 }
 
+local mode_options = {
+    {description = "Grid",     data = "grid"},
+    {description = "Circle",   data = "polar"},
+    {description = "Disabled", data = "disabled"},
+}
+
 configuration_options = {
     -- Keys
     AddConfig("Toggle alignment offset",  "CYCLE_OFFSET_KEY",         keylist, "KEY_T",      "Toggle between aligning on (eg. tile) centers or corners"),
@@ -62,7 +72,8 @@ configuration_options = {
     AddConfig("Mode",                     "TOGGLE_ENABLED_KEY",       keylist, "KEY_H",      "Change mode between grid, circle, and disabled. Control+MODE sets origin. Shift+MODE rotates grid around origin."),
 
     -- Options
-    AddConfig("Default visible placers", "PLACERS_START_VISIBLE",   boolean,            true, "Toggle whether placers show up by default while holding an item"),
-    AddConfig("Default grid spacing",    "DEFAULT_DROP_RESOLUTION", resolution_options, 2,    "Change which grid spacing is used upon entering game or using Reset Defaults keybind"),
-    AddConfig("Default offset grid",     "DEFAULT_DROP_OFFSET",     offset_options,     1,    "Change which grid spacing is used upon entering game or using Reset Defaults keybind"),
+    AddConfig("Default visible placers", "PLACERS_START_VISIBLE",   boolean,            true,   "Toggle whether placers show up by default while holding an item"),
+    AddConfig("Default grid spacing",    "DEFAULT_DROP_RESOLUTION", resolution_options, 2,      "Change which grid spacing is used upon entering game or using the Reset Defaults keybind"),
+    AddConfig("Default offset grid",     "DEFAULT_DROP_OFFSET",     offset_options,     1,      "Change which grid spacing is used upon entering game or using the Reset Defaults keybind"),
+    AddConfig("Default mode",            "DEFAULT_MODE",            mode_options,       "grid", "Select which dropper mode is enabled upon entering the game or using the Reset Defaults keybind"),
 }

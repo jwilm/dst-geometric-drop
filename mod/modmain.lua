@@ -65,6 +65,7 @@ local placersEnabled = GetModConfigData("PLACERS_START_VISIBLE")
 local placersVisible = false
 local defaultDropResolution = GetModConfigData("DEFAULT_DROP_RESOLUTION")
 local defaultDropOffset = GetModConfigData("DEFAULT_DROP_OFFSET")
+local defaultMode = GetModConfigData("DEFAULT_MODE")
 local dropResolution = defaultDropResolution
 local dropOffset = defaultDropOffset
 
@@ -134,7 +135,19 @@ GridDropper = {
 PolarDropper = {
     last_input = { r = 0, theta = 0, d_theta = 0 }
 }
-dropper = GridDropper
+
+-- Get the default dropper as specified by the mod options
+function GetDefaultDropper()
+    if defaultMode == "polar" then
+        return PolarDropper
+    elseif defaultMode == "disabled" then
+        return DefaultDropper
+    else
+        return GridDropper
+    end
+end
+
+dropper = GetDefaultDropper()
 
 -- OriginManager provides a shared origin
 local OriginManager = { origin = { x = 0, y = 0, z = 0 }}
@@ -431,7 +444,7 @@ TheInput:AddKeyUpHandler(RESTORE_DEFAULTS_KEY, function ()
     OriginManager:Reset()
     dropper:Reset()
     dropper:HidePlacers()
-    dropper = GridDropper
+    dropper = GetDefaultDropper()
 
     if placersEnabled then
         dropper:ShowPlacers()

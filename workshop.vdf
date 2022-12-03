@@ -6,7 +6,7 @@
 	"previewfile"		"/home/jwilm/code/geometric_drop/modicon.png"
 	"visibility"		"0"
 	"title"		"Geometric Drop"
-	"changenote"		"Version 1.4. Adds grid rotation and circle dropping."
+	"changenote"		"Version 1.4.1: Adds default mode config option."
 	"description"		"
 [h1]Geometric Item Dropping[/h1]
 Drop items aligned to a configurable grid with a visual placer.
@@ -31,6 +31,7 @@ Drop items in a circle! 100% less square. Activate circle dropper with the MODE 
 [*] Setting to control whether placers show up by default
 [*] Switch default grid spacing
 [*] Switch default grid offset
+[*] Switch default drop mode (grid, circle, disabled)
 [/list]
 [h1]If you use Advanced Controls...[/h1]
 The Advanced Controls mod intercepts drop actions regardless of whether you have the drop function disabled in their mod settings. As the author is no longer maintaining the mod, I published a [url=https://steamcommunity.com/sharedfiles/filedetails/?id=2431821454]patched version of Advanced Controls[/url] which let's both mods run harmoniously together. If you decide to use this patched version, please unsubscribe from the [url=https://steamcommunity.com/sharedfiles/filedetails/?id=1601725838]original Advanced Controls[/url] workshop item to prevent duplicates in your mod list.
