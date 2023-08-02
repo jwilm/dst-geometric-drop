@@ -121,6 +121,10 @@ local function InitializePlacers()
 end
 
 function MightBeTyping()
+    if ThePlayer ~= nil and ThePlayer.HUD:HasInputFocus() then
+        return true
+    end
+
     if (TheFrontEnd:GetActiveScreen() and TheFrontEnd:GetActiveScreen().name or ""):find("HUD") ~= nil then
         return false
     end
