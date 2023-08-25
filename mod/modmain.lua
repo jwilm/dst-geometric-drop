@@ -574,8 +574,7 @@ end)
 local function DropItemFromSlot(slot, item, single_item)
     local inventory = ThePlayer.replica.inventory
     local inventoryitem = item.replica.inventoryitem
-    if not single_item and not inventory:GetActiveItem()
-      and inventoryitem:CanGoInContainer() and not inventoryitem:CanOnlyGoInPocket() then
+    if not inventory:GetActiveItem() and inventoryitem:CanGoInContainer() and not inventoryitem:CanOnlyGoInPocket() then
         if slot.equipslot then
             inventory:TakeActiveItemFromEquipSlot(slot.equipslot)
         elseif slot.num then
@@ -590,9 +589,13 @@ end
 local function InvSlotPostInit(self)
     local InvSlotOnControl = self.OnControl
     self.OnControl = function(self, control, down)
-        if down and control == CONTROL_SECONDARY and self.tile then
+        -- Right Click
+        local right_click = control == CONTROL_SECONDARY
+        if right_click and down then
             local single_item = TheInput:IsControlPressed(CONTROL_FORCE_STACK)
-            if TheInput:IsControlPressed(CONTROL_FORCE_TRADE) or single_item then
+            local force_trade_pressed = TheInput:IsControlPressed(CONTROL_FORCE_TRADE)
+
+            if self.tile and force_trade_pressed then
                 DropItemFromSlot(self, self.tile.item, single_item)
                 return true
             end

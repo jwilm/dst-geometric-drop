@@ -3,6 +3,10 @@ name = "Geometric Drop"
 description = [[
 Drop items aligned to the grid with a visual placer
 
+Version 1.4.3
+
+Cleanup inventory drop handler in hopes of fixing combat drop bug
+
 Version 1.4.2
 
 Text input in UI like crafting search is now ignored
@@ -20,7 +24,7 @@ MODE key: Geo Drop `Mode` keybinding. Default: H
 ]]
 
 author = "Chaosmonkey"
-version = "1.4.2"
+version = "1.4.3"
 api_version_dst = 10
 
 icon_atlas = "modicon.xml"
