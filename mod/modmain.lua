@@ -493,6 +493,7 @@ TheInput:AddKeyUpHandler(TOGGLE_PLACERS_KEY, function ()
 end)
 
 local function DropActiveItemOnGrid(pos, active_item)
+    print("geodrop: DropActiveItemOnGrid")
     local playercontroller = ThePlayer.components.playercontroller
 
     pos = dropper:AlignToGrid(pos)
@@ -572,6 +573,7 @@ AddComponentPostInit("playercontroller", function(self)
 end)
 
 local function DropItemFromSlot(slot, item, single_item)
+    print("geodrop: DropItemFromSlot")
     local inventory = ThePlayer.replica.inventory
     local inventoryitem = item.replica.inventoryitem
     if not inventory:GetActiveItem() and inventoryitem:CanGoInContainer() and not inventoryitem:CanOnlyGoInPocket() then
@@ -582,6 +584,7 @@ local function DropItemFromSlot(slot, item, single_item)
         end
         DropActiveItemOnGrid(ThePlayer:GetPosition(), item)
     else
+        print("geodrop: DropItemFromInvTile")
         inventory:DropItemFromInvTile(item, single_item)
     end
 end
