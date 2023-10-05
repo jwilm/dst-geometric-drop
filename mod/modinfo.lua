@@ -3,9 +3,9 @@ name = "Geometric Drop"
 description = [[
 Drop items aligned to the grid with a visual placer
 
-Version 1.4.4
+Version 1.4.5
 
-Logging to debug swap drop issue
+Restore quick dropping off grid using Shift+Control+Right Click inventory item.
 
 Version 1.4
 
@@ -16,7 +16,7 @@ MODE key: Geo Drop `Mode` keybinding. Default: H
 ]]
 
 author = "Chaosmonkey"
-version = "1.4.4"
+version = "1.4.5"
 api_version_dst = 10
 
 icon_atlas = "modicon.xml"

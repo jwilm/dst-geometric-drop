@@ -576,7 +576,7 @@ local function DropItemFromSlot(slot, item, single_item)
     print("geodrop: DropItemFromSlot")
     local inventory = ThePlayer.replica.inventory
     local inventoryitem = item.replica.inventoryitem
-    if not inventory:GetActiveItem() and inventoryitem:CanGoInContainer() and not inventoryitem:CanOnlyGoInPocket() then
+    if not single_item and not inventory:GetActiveItem() and inventoryitem:CanGoInContainer() and not inventoryitem:CanOnlyGoInPocket() then
         if slot.equipslot then
             inventory:TakeActiveItemFromEquipSlot(slot.equipslot)
         elseif slot.num then
