@@ -6,7 +6,7 @@
 	"previewfile"		"/home/jwilm/code/geometric_drop/modicon.png"
 	"visibility"		"0"
 	"title"		"Geometric Drop"
-	"changenote"		"Version 1.4.5: Restore quick drop off grid (shift+ctrl right click). This binding is consistent with vanilla quick drop controls."
+	"changenote"		"Version 1.4.6: Fix issue where restore defaults key did not correctly handle placer visibility"
 	"description"		"
 [h1]Geometric Item Dropping[/h1]
 Drop items aligned to a configurable grid with a visual placer.

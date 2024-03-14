@@ -3,9 +3,9 @@ name = "Geometric Drop"
 description = [[
 Drop items aligned to the grid with a visual placer
 
-Version 1.4.5
+Version 1.4.6
 
-Restore quick dropping off grid using Shift+Control+Right Click inventory item.
+Fix bug where reset defaults key did not correctly handle placer visibility.
 
 Version 1.4
 

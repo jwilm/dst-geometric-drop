@@ -61,7 +61,8 @@ local TheWorld
 -- -----------------------
 -- Variables
 -- -----------------------
-local placersEnabled = GetModConfigData("PLACERS_START_VISIBLE")
+local defaultPlacersEnabled = GetModConfigData("PLACERS_START_VISIBLE")
+local placersEnabled = defaultPlacersEnabled
 local placersVisible = false
 local defaultDropResolution = GetModConfigData("DEFAULT_DROP_RESOLUTION")
 local defaultDropOffset = GetModConfigData("DEFAULT_DROP_OFFSET")
@@ -447,11 +448,17 @@ TheInput:AddKeyUpHandler(RESTORE_DEFAULTS_KEY, function ()
 
     OriginManager:Reset()
     dropper:Reset()
-    dropper:HidePlacers()
     dropper = GetDefaultDropper()
+    placersEnabled = defaultPlacersEnabled
 
     if placersEnabled then
         dropper:ShowPlacers()
+        local activeItem = ThePlayer.replica.inventory:GetActiveItem()
+        if activeItem then
+            dropper:ShowPlacers()
+        elseif activeItem then
+            dropper:HidePlacers()
+        end
     end
 
     dropResolution = defaultDropResolution
@@ -482,6 +489,7 @@ end)
 
 TheInput:AddKeyUpHandler(TOGGLE_PLACERS_KEY, function ()
     if MightBeTyping() then return end
+
     placersEnabled = not placersEnabled
     local activeItem = ThePlayer.replica.inventory:GetActiveItem()
     if activeItem and placersEnabled then
